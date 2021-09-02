@@ -17,8 +17,8 @@ jobs:
         with:
           go-version: 1.17
 
-      - name: Test
-        run: go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -count=1 -race
+      - name: Test Generator
+        run: cd generator && go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -count=1 -race
 
-      - name: Coverage
-        run: bash <(curl -s https://codecov.io/bash)
+      - name: Coverage of generator
+        run: cd generator && bash <(curl -s https://codecov.io/bash)
