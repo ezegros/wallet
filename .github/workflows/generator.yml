@@ -1,8 +1,6 @@
 name: Go
 
 on:
-  push:
-    branches: [main]
   pull_request:
     paths:
       - 'generator/**'
@@ -23,6 +21,3 @@ jobs:
 
       - name: Test
         run: cd generator && go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -count=1 -race
-
-      - name: Coverage
-        run: cd generator && bash <(curl -s https://codecov.io/bash)
