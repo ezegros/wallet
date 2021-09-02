@@ -2,16 +2,23 @@ package main
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMainProgram(t *testing.T) {
-	go main()
+	router := gin.Default()
 
-	r, err := http.Get("http://localhost:8080/health/")
-	assert.NoError(t, err)
+	healthCheck(router)
 
-	assert.Equal(t, http.StatusOK, r.StatusCode)
+	r := httptest.NewRequest("GET", "/health", nil)
+
+	rw := httptest.NewRecorder()
+
+	router.ServeHTTP(rw, r)
+
+	assert.Equal(t, http.StatusOK, rw.Code)
 }
