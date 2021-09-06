@@ -7,12 +7,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// MapRoutes creates all the routes needed
 func MapRoutes(router *gin.Engine, dynamo dynamodbiface.DynamoDBAPI, log *zap.SugaredLogger) {
 	// Create user repo
 	ur := user.NewRepository(dynamo, "Users", log)
 	us := user.NewService(log, ur)
 	uh := user.NewHandler(us)
 
+	// Create users router
 	users := router.Group("/users")
 	users.POST("/", uh.Create())
 }

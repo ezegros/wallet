@@ -18,6 +18,7 @@ type service struct {
 	log  *zap.SugaredLogger
 }
 
+// NewService returns a service struct which must implement the Service interface
 func NewService(log *zap.SugaredLogger, repo Repository) Service {
 	return &service{
 		log:  log.Named("User Service"),
@@ -25,22 +26,28 @@ func NewService(log *zap.SugaredLogger, repo Repository) Service {
 	}
 }
 
+// Create creates a new user using the repo and receiveng the data from the handler
 func (s *service) Create(ctx context.Context, username, password string) (*domain.User, error) {
+	// Hash the password
 	pwd, _ := security.HashPassword(password)
 
+	// Map the values
 	user := &domain.User{
 		ID:       uuid.New().String(),
 		Username: username,
 		Password: pwd,
 	}
 
+	// Store the new user in the table
 	err := s.repo.Store(ctx, user)
 	if err != nil {
 		return nil, err
 	}
 
+	// Prevent the password from being returned back to the user
 	user.Password = ""
 
+	// Log the creation
 	s.log.Infow("Created user", "username", username)
 
 	return user, nil

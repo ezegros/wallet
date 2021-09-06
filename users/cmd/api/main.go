@@ -19,14 +19,18 @@ func main() {
 
 	sl := l.Sugar()
 
+	// Initialize the database
 	db.InitializeDatabase()
 
 	dynamoDb := db.DynamoDB
 
+	// Map the routes
 	routes.MapRoutes(router, dynamoDb, sl)
 
+	// Create the health-check router
 	healthCheck(router)
 
+	// Start the server
 	router.Run(":8080")
 }
 

@@ -16,11 +16,15 @@ type Repository interface {
 }
 
 type repository struct {
+	// DynamoDB used for storage
 	dynamo dynamodbiface.DynamoDBAPI
-	table  string
-	log    *zap.SugaredLogger
+	// Name of the table
+	table string
+	// Logger
+	log *zap.SugaredLogger
 }
 
+// NewRepository returns a new repository struct which must implement the Repository interface
 func NewRepository(dynamo dynamodbiface.DynamoDBAPI, table string, log *zap.SugaredLogger) Repository {
 	return &repository{
 		dynamo: dynamo,
@@ -29,13 +33,16 @@ func NewRepository(dynamo dynamodbiface.DynamoDBAPI, table string, log *zap.Suga
 	}
 }
 
+// Store stores the user in the dynamodb table
 func (r *repository) Store(ctx context.Context, user *domain.User) error {
+	// Marshal the user struct into a map with dynamo attrs
 	av, err := dynamodbattribute.MarshalMap(user)
 	if err != nil {
 		r.log.Errorw("Error marshaling user", "error", err.Error())
 		return err
 	}
 
+	// Put/Inser the item in the table
 	_, err = r.dynamo.PutItem(&dynamodb.PutItemInput{
 		Item:      av,
 		TableName: aws.String(r.table),

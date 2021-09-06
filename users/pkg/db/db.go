@@ -12,6 +12,7 @@ import (
 
 var DynamoDB *dynamodb.DynamoDB
 
+// InitializeDatabase intialize the dynamodb database with the aws SDK
 func InitializeDatabase() {
 	region := "us-west-2"
 	endpoint := fmt.Sprintf("http://%s:%s", os.Getenv("DYNAMODB_SRV_SERVICE_HOST"), os.Getenv("DYNAMODB_SRV_SERVICE_PORT"))
@@ -24,7 +25,7 @@ func InitializeDatabase() {
 
 	/* sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-east-1"),
-		Credentials: credentials.NewSharedCredentials("/home/ezegrosfeld/.aws/credentials", "default"),
+		Credentials: credentials.NewSharedCredentials("/home/username/.aws/credentials", "default"),
 	})
 	if err != nil {
 		panic(err)
