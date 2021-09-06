@@ -50,10 +50,16 @@ func (s *service) Create() (domain.Wallet, error) {
 		return domain.Wallet{}, err
 	}
 
+	pk, err := wallet.PrivateKeyHex(account)
+	if err != nil {
+		return domain.Wallet{}, err
+	}
+
 	w := domain.Wallet{
-		Seed:    mnemonic,
-		Index:   0,
-		Address: account.Address.Hex(),
+		Seed:       mnemonic,
+		PrivateKey: pk,
+		Index:      0,
+		Address:    account.Address.Hex(),
 	}
 
 	return w, nil

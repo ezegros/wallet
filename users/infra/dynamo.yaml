@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamodb-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamodb
+  template:
+    metadata:
+      labels:
+        app: dynamodb
+    spec:
+      containers:
+        - name: dynamodb
+          image: amazon/dynamodb-local:latest
+          args:
+            - '-jar'
+            - 'DynamoDBLocal.jar'
+            - '-sharedDb'
+            - '-dbPath'
+            - '.'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynamodb-srv
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: dynamodb
+  ports:
+    - name: tcp-client
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dynamodb-admin-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dynamodb-admin
+  template:
+    metadata:
+      labels:
+        app: dynamodb-admin
+    spec:
+      containers:
+        - name: dynamodb-admin
+          image: aaronshaf/dynamodb-admin
+          env:
+            - name: DYNAMO_ENDPOINT
+              value: http://$(DYNAMODB_SRV_SERVICE_HOST):8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dynamodb-admin-srv
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app: dynamodb-admin
+  ports:
+    - name: tcp-client
+      protocol: TCP
+      port: 8001
+      targetPort: 8001
