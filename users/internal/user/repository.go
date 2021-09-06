@@ -14,6 +14,7 @@ import (
 type Repository interface {
 	Store(ctx context.Context, user *domain.User) error
 	Exists(username string) bool
+	GetByUsername(username string) (*domain.User, error)
 }
 
 type repository struct {
@@ -75,4 +76,35 @@ func (r *repository) Exists(username string) bool {
 
 	// Check if the amount of user is grater than 0
 	return *result.Count >= 1
+}
+
+// GetByUsername returns the user found by username
+func (r *repository) GetByUsername(username string) (*domain.User, error) {
+	result, err := r.dynamo.Scan(&dynamodb.ScanInput{
+		TableName:        aws.String(r.table),
+		FilterExpression: aws.String("username = :username"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":username": {
+				S: aws.String(username),
+			},
+		},
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return itemToUser(result.Items[0])
+
+}
+
+// Transforms the dynamo map into a usable domain.User
+func itemToUser(av map[string]*dynamodb.AttributeValue) (*domain.User, error) {
+	user := new(domain.User)
+	err := dynamodbattribute.UnmarshalMap(av, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

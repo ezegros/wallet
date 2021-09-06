@@ -26,5 +26,5 @@ func TestRouteMapping(t *testing.T) {
 	MapRoutes(router, db, l.Sugar())
 
 	i := router.Routes()
-	assert.Equal(t, len(i), 1)
+	assert.Equal(t, len(i), 2)
 }

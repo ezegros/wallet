@@ -11,11 +11,14 @@ import (
 )
 
 var (
-	ErrConflict = errors.New("user alredy exist")
+	ErrConflict      = errors.New("user alredy exist")
+	ErrNotFound      = errors.New("user not found")
+	ErrWrongPassword = errors.New("the password is incorrect")
 )
 
 type Service interface {
 	Create(ctx context.Context, username, password string) (*domain.User, error)
+	Login(ctx context.Context, username, password string) (*domain.User, error)
 }
 
 type service struct {
@@ -60,6 +63,20 @@ func (s *service) Create(ctx context.Context, username, password string) (*domai
 
 	// Log the creation
 	s.log.Infow("Created user", "username", username)
+
+	return user, nil
+}
+
+func (s *service) Login(ctx context.Context, username, password string) (*domain.User, error) {
+	user, err := s.repo.GetByUsername(username)
+	if err != nil {
+		return nil, ErrNotFound
+	}
+
+	err = security.CompareHashAndPassword(user.Password, password)
+	if err != nil {
+		return nil, ErrWrongPassword
+	}
 
 	return user, nil
 }

@@ -17,4 +17,5 @@ func MapRoutes(router *gin.Engine, dynamo dynamodbiface.DynamoDBAPI, log *zap.Su
 	// Create users router
 	users := router.Group("/users")
 	users.POST("/", uh.Create())
+	users.POST("/login", uh.Login())
 }

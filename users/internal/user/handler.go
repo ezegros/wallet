@@ -11,6 +11,7 @@ import (
 
 type Handler interface {
 	Create() gin.HandlerFunc
+	Login() gin.HandlerFunc
 }
 
 type handler struct {
@@ -57,5 +58,40 @@ func (h *handler) Create() gin.HandlerFunc {
 		c.SetCookie("token", token, int(time.Hour)*24*7, "/", "", false, true)
 
 		c.JSON(http.StatusCreated, user)
+	}
+}
+
+// Check if password is correct and sets the cookie with the jwt information
+func (h *handler) Login() gin.HandlerFunc {
+	type request struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	return func(c *gin.Context) {
+		r := new(request)
+		err := c.ShouldBindJSON(&r)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		user, err := h.s.Login(c, r.Username, r.Password)
+		if err != nil {
+			if errors.Is(err, ErrNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+				return
+			}
+			if errors.Is(err, ErrWrongPassword) {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+				return
+			}
+		}
+
+		token, _ := security.CreateJWT(user.ID)
+
+		c.SetCookie("token", token, int(time.Hour)*24*7, "/", "", false, true)
+
+		c.JSON(http.StatusCreated, nil)
 	}
 }

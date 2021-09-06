@@ -180,3 +180,93 @@ func TestNotExistsWithError(t *testing.T) {
 	exists := repo.Exists(user.Username)
 	assert.False(t, exists)
 }
+
+func TestGetByUsername(t *testing.T) {
+	db := &mockDynamoDBClient{}
+
+	user := &domain.User{ID: "asda", Username: "username", Password: "contraseña"}
+
+	input := &dynamodb.ScanInput{
+		TableName:        aws.String("Users"),
+		FilterExpression: aws.String("username = :username"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":username": {
+				S: aws.String(user.Username),
+			},
+		},
+	}
+
+	l, _ := zap.NewProduction()
+
+	sl := l.Sugar()
+
+	o := &dynamodb.ScanOutput{
+		Count: aws.Int64(1),
+		Items: []map[string]*dynamodb.AttributeValue{
+			{
+				"id": {
+					S: aws.String(user.ID),
+				},
+				"password": {
+					S: aws.String(user.Password),
+				},
+				"username": {
+					S: aws.String(user.Username),
+				},
+			},
+		},
+	}
+
+	db.On("Scan", input).Return(o, nil)
+
+	repo := NewRepository(db, "Users", sl)
+
+	usr, err := repo.GetByUsername("username")
+	assert.NoError(t, err)
+	assert.NotNil(t, usr.Username)
+
+}
+
+func TestGetByUsernameError(t *testing.T) {
+	db := &mockDynamoDBClient{}
+
+	user := &domain.User{ID: "asda", Username: "username", Password: "contraseña"}
+
+	input := &dynamodb.ScanInput{
+		TableName:        aws.String("Users"),
+		FilterExpression: aws.String("username = :username"),
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":username": {
+				S: aws.String(user.Username),
+			},
+		},
+	}
+
+	l, _ := zap.NewProduction()
+
+	sl := l.Sugar()
+
+	o := &dynamodb.ScanOutput{
+		Count: aws.Int64(1),
+		Items: []map[string]*dynamodb.AttributeValue{
+			{
+				"id": {
+					S: aws.String(user.ID),
+				},
+				"password": {
+					S: aws.String(user.Password),
+				},
+				"username": {
+					S: aws.String(user.Username),
+				},
+			},
+		},
+	}
+
+	db.On("Scan", input).Return(o, fmt.Errorf("Error finding user"))
+
+	repo := NewRepository(db, "Users", sl)
+
+	_, err := repo.GetByUsername("username")
+	assert.Error(t, err)
+}
