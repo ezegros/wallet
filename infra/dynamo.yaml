@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dynamodb-depl
+  namespace: wallet
 spec:
   replicas: 1
   selector:
@@ -26,6 +27,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: dynamodb-srv
+  namespace: wallet
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local
@@ -41,6 +43,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dynamodb-admin-depl
+  namespace: wallet
 spec:
   replicas: 1
   selector:
@@ -62,6 +65,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: dynamodb-admin-srv
+  namespace: wallet
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local

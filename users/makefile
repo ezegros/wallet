@@ -13,4 +13,4 @@ test-cover:
 deploy:
 	@docker build -t ezegrosfeld/wallet-users .
 	@docker push ezegrosfeld/wallet-users
-	@kubectl rollout restart deployment users-depl
+	@kubectl rollout restart deployment users-depl -n wallet

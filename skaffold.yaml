@@ -1,0 +1,29 @@
+apiVersion: skaffold/v2beta16
+kind: Config
+metadata:
+  name: wallet
+deploy:
+  statusCheckDeadlineSeconds: 60
+  kubectl:
+    manifests:
+      - infra/*.yaml
+      - wallet/infra/*.yaml
+      - generator/infra/*.yaml
+build:
+  local:
+    push: false
+  artifacts:
+    - image: ezegrosfeld/wallet-users
+      context: users
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        infer:
+          - '**/*.go'
+    - image: ezegrosfeld/wallet-generator
+      context: generator
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        infer:
+          - '**/*.go'
