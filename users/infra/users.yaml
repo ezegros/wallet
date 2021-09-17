@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-depl
+  namespace: wallet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+      annotations:
+        kuma.io/mesh: default
+        kuma.io/gateway: enabled
+    spec:
+      containers:
+        - name: users
+          image: ezegrosfeld/wallet-users
+          env:
+            - name: GENERATOR_URL
+              value: http://generator-srv:8080
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: '/health'
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-srv
+  namespace: wallet
+  annotations:
+    ingress.kubernetes.io/service-upstream: 'true'
+spec:
+  selector:
+    app: users
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
