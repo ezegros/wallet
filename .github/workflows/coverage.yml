@@ -16,15 +16,3 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.17
-
-      - name: Test Generator
-        run: cd generator && go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -count=1 -race
-
-      - name: Coverage of generator
-        run: cd generator && bash <(curl -s https://codecov.io/bash)
-
-      - name: Test Users
-        run: cd users && go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -count=1 -race
-
-      - name: Coverage of users
-        run: cd users && bash <(curl -s https://codecov.io/bash)

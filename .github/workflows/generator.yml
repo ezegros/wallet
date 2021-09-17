@@ -21,3 +21,6 @@ jobs:
 
       - name: Test
         run: cd generator && go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -count=1 -race
+
+      - name: Coverage
+        run: cd users && bash <(curl -s https://codecov.io/bash)
