@@ -19,6 +19,9 @@ spec:
       containers:
         - name: users
           image: ezegrosfeld/wallet-users
+          env:
+            - name: GENERATOR_URL
+              value: http://generator-srv:8080
           livenessProbe:
             failureThreshold: 2
             httpGet:

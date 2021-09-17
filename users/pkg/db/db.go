@@ -3,14 +3,16 @@ package db
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 )
 
-var DynamoDB *dynamodb.DynamoDB
+var DynamoDB dynamodbiface.DynamoDBAPI
 
 // InitializeDatabase intialize the dynamodb database with the aws SDK
 func InitializeDatabase() {
@@ -35,4 +37,34 @@ func InitializeDatabase() {
 	dynamodb := dynamodb.New(sess)
 
 	DynamoDB = dynamodb
+}
+
+func CreateTable(dynamo dynamodbiface.DynamoDBAPI, name string) error {
+	_, err := dynamo.CreateTable(&dynamodb.CreateTableInput{
+		TableName: aws.String(name),
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("id"),
+				AttributeType: aws.String("S"),
+			},
+		},
+		KeySchema: []*dynamodb.KeySchemaElement{
+			{
+				AttributeName: aws.String("id"),
+				KeyType:       aws.String("HASH"),
+			},
+		},
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits:  aws.Int64(10),
+			WriteCapacityUnits: aws.Int64(10),
+		},
+	})
+	if err != nil {
+		message := err.Error()
+		if strings.Contains(message, "Cannot create preexisting table") {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
