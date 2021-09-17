@@ -1,0 +1,16 @@
+apiVersion: 'kuma.io/v1alpha1'
+kind: Dataplane
+mesh: default
+metadata:
+  namespace: wallet
+  name: dp-generator
+  annotations:
+    kuma.io/sidecar-injection: enabled
+    kuma.io/mesh: default
+networking:
+  address: 10.0.0.1
+  inbound:
+    - port: 8888
+      servicePort: 8080
+      tags:
+        kuma.io/service: generator-srv_wallet_svc_8080

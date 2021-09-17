@@ -7,7 +7,7 @@ deploy:
   kubectl:
     manifests:
       - infra/*.yaml
-      - wallet/infra/*.yaml
+      - users/infra/*.yaml
       - generator/infra/*.yaml
 build:
   local:
